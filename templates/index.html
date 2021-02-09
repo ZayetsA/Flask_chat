@@ -1,0 +1,51 @@
+{%extends 'base.html'%}
+
+{%block content%}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand mx-3" href="/">My chat application</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            {% if current_user.is_authenticated%}
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Log out</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="/create-room/">Create room <span class="sr-only"></span></a>
+            </li>
+            {%else%}
+            <li class="nav-item active">
+                <a class="nav-link" href="/login">log in <span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/signup">Sign up</a>
+            </li>
+            {%endif%}
+        </ul>
+    </div>
+</nav>
+<div class="alert alert-success text-center" role="alert">
+    Hello,
+    {% if current_user.is_authenticated%}
+    {{current_user.username}}
+    {%else%} Guest!</h3>
+    {%endif%}
+</div>
+
+
+<div class="container">
+    {% if current_user.is_authenticated%}
+    <h3>You rooms:</h3>
+    <ul>
+        {% for room in rooms %}
+        <li><a href="/rooms/{{room._id.room_id}}">{{room.room_name}}</a></li>
+        {%endfor%}
+        {%else%}
+        <h3>Please, log in to start chatting !</h3>
+        {%endif%}
+    </ul>
+</div>
+{%endblock%}

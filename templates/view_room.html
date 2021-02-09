@@ -1,0 +1,120 @@
+{%extends 'base.html'%}
+
+{%block content%}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand mx-3" href="/">Chat </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            {%if current_user.username==room.created_by%}
+            <li class="nav-item active">
+                <a class="nav-link" href="/rooms/{{room._id}}/edit/">Edit</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="/rooms/{{room._id}}/delete/">Delete room</a>
+            </li>
+            {%endif%}
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Back</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="alert alert-success" role="alert">
+    <h1 style="text-align: center">welcome to chat room: {{room.name}}, {{current_user.username}}!</h1>
+</div>
+
+<ul>
+    <h4>Chat members:</h4>
+    {%for member in room_members%}
+    <li>{{member._id.username}}</li>
+    {%endfor%}
+</ul>
+
+<div class="container" id="messages" style="background-color: gainsboro; overflow: scroll;  overflow-x: hidden; position: center;
+    width: 900px;
+    height: 400px;
+    bottom: 0px;">
+    {% for message in messages %}
+    <div style="background-color: beige ">
+        <b>{{message.sender}}:&nbsp;</b> {{message.text}}
+        <p><sub>[{{message.created_at}}]&nbsp;</sub></p>
+    </div>
+    {%endfor%}
+</div>
+
+
+<form id="message_input_form" style="
+    text-align: center;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 80px;">
+    <input type="text" id="message_input" placeholder="Enter your message..."
+           style="position: absolute; width: 100%; left: 0; bottom: 0; height: 50px">
+    <button type="submit" style="position: absolute; width: 10%; right: 0; bottom: 0; height: 50px"> Send</button>
+</form>
+
+</body>
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"
+        integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+<script>
+    const socket = io.connect("http://127.0.0.1:5000");
+    socket.on('connect', function () {
+        socket.emit('join_room', {
+            username: "{{username}}",
+            room: "{{room._id}}"
+        });
+        let message_input = document.getElementById('message_input');
+        document.getElementById('message_input_form').onsubmit = function (event) {
+            event.preventDefault();
+            let message = message_input.value.trim();
+            if (message.length) {
+                socket.emit('send_message', {
+                    username: "{{username}}",
+                    room: "{{room._id}}",
+                    message: message
+                })
+            }
+            message_input.value = '';
+            message_input.focus();
+        }
+    });
+
+    window.onbeforeunload = function () {
+        socket.emit('leave_room', {
+            username: "{{username}}",
+            room: "{{room._id}}"
+        })
+    };
+
+    socket.on('receive_message', function (data) {
+        console.log(data);
+        const newNode = document.createElement('div');
+
+        newNode.innerHTML = `<div style="background-color: beige "><b>${data.username}:&nbsp;</b> ${data.message}
+        <p><sub>[${data.created_at}]&nbsp;</sub></p></div>`;
+        document.getElementById('messages').appendChild(newNode);
+        const messageBody = document.querySelector('#messages');
+        messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
+    });
+
+    socket.on('join_room_announcement', function (data) {
+        console.log(data);
+        const newNode = document.createElement('div');
+        newNode.innerHTML = `<div style="background: green"><text><b>${data.username}</b> has joined the room</text></div>`;
+        document.getElementById('messages').appendChild(newNode);
+    });
+
+    socket.on('leave_room_announcement', function (data) {
+        console.log(data);
+        const newNode = document.createElement('div');
+        newNode.innerHTML = `<div style="background: red"><text><b>${data.username}</b> has left the room</text></div>`;
+        document.getElementById('messages').appendChild(newNode);
+    });
+</script>
+{%endblock%}

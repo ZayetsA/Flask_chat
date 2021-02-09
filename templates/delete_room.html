@@ -1,0 +1,41 @@
+{%extends 'base.html'%}
+
+{%block content%}
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand mx-3" href="/">Chat </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            {% if current_user.is_authenticated%}
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Log out</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Back</a>
+            </li>
+            {%else%}
+            <li class="nav-item active">
+                <a class="nav-link" href="/login">log in <span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/signup">Sign up</a>
+            </li>
+            {%endif%}
+        </ul>
+    </div>
+</nav>
+<form method="post" class="text-center mt-4">
+    <h1 class="h3 mb-3 font-weight-normal">Delete room</h1>
+    <label>Room name:</label>
+    <input disabled type="text" id="inputRoomName" class="form" placeholder="Room name" required autofocus
+           name="room_name" value="{{room.name}}">
+    <br>
+
+    <h3>{{message}}</h3>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+</form>
+{%endblock%}
