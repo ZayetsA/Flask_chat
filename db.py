@@ -65,6 +65,9 @@ def remove_room(room_id):
     room_members_collection.delete_many({
         '_id.room_id': ObjectId(room_id)
     })
+    messages_collection.delete_many({
+        'room_id': room_id
+    })
 
 
 def get_room(room_id):
